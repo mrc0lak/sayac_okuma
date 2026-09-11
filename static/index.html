@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Su Sayacı Analiz Sistemi</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0f172a;
+            --panel: #182235;
+            --panel-soft: #202d43;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #a8b4c7;
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --danger: #f87171;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 36px 20px;
+            background: linear-gradient(145deg, #0b1120, var(--bg));
+            color: var(--text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container { width: min(1120px, 100%); margin: 0 auto; }
+        h1 { margin: 0 0 8px; font-size: clamp(25px, 4vw, 36px); }
+        .subtitle { margin: 0 0 26px; color: var(--muted); }
+
+        .panel {
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: rgba(24, 34, 53, 0.96);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .upload-area {
+            padding: 38px 20px;
+            border: 2px dashed #4ade80;
+            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.06);
+            text-align: center;
+            cursor: pointer;
+            transition: 160ms ease;
+        }
+
+        .upload-area:hover, .upload-area.dragging {
+            border-color: #86efac;
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .upload-title { display: block; margin-bottom: 7px; font-size: 18px; font-weight: 700; }
+        .upload-help { color: var(--muted); font-size: 14px; }
+
+        .selection-summary {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 18px 0 0;
+            color: var(--muted);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .preview-card {
+            min-width: 0;
+            padding: 7px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--panel-soft);
+        }
+
+        .preview-card img { width: 100%; height: 82px; object-fit: cover; border-radius: 6px; }
+        .preview-name { overflow: hidden; margin-top: 5px; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+
+        .actions { display: flex; gap: 12px; margin-top: 20px; }
+        button {
+            flex: 1;
+            padding: 12px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: var(--primary);
+            color: #062b13;
+            font: inherit;
+            font-weight: 750;
+            cursor: pointer;
+        }
+        button:hover { background: #4ade80; }
+        button:disabled { cursor: not-allowed; opacity: 0.55; }
+        button.secondary { border: 1px solid var(--border); background: var(--panel-soft); color: var(--text); }
+
+        .progress-box { display: none; margin-top: 20px; }
+        .progress-meta { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--muted); font-size: 14px; }
+        .progress-track { height: 9px; overflow: hidden; border-radius: 999px; background: #0b1220; }
+        .progress-bar { width: 0; height: 100%; background: var(--primary); transition: width 220ms ease; }
+
+        .results { display: none; margin-top: 26px; }
+        .results-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+        .results-head h2 { margin: 0; font-size: 21px; }
+        .save-message { min-height: 20px; margin: 10px 0 0; color: #86efac; font-size: 14px; }
+
+        .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 11px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 13px 15px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+        th { background: #111b2c; color: #cbd5e1; font-size: 13px; letter-spacing: .02em; text-transform: uppercase; }
+        tbody tr:last-child td { border-bottom: 0; }
+        tbody tr.error-row { color: var(--danger); }
+        .empty { padding: 20px; color: var(--muted); text-align: center; }
+
+        @media (max-width: 650px) {
+            body { padding: 20px 12px; }
+            .panel { padding: 17px; }
+            .actions, .results-head { align-items: stretch; flex-direction: column; }
+        }
+
+        @media print {
+            @page { margin: 14mm; }
+            body { padding: 0; background: white; color: black; }
+            .container { width: 100%; }
+            .panel { padding: 0; border: 0; box-shadow: none; }
+            .no-print, .subtitle { display: none !important; }
+            .results { display: block !important; margin-top: 0; }
+            .results-head { margin-bottom: 12px; }
+            .table-wrap { overflow: visible; border-color: #aaa; }
+            table { color: black; }
+            th { background: #eee; color: black; }
+            th, td { border-color: #bbb; }
+            .error-row { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+<main class="container">
+    <h1>Su Sayacı Analiz Sistemi</h1>
+
+    <section class="panel">
+        <div class="no-print">
+            <div class="upload-area" id="drop-zone" role="button" tabindex="0">
+                <span class="upload-title">Sayaç fotoğraflarını seçin</span>
+                <span class="upload-help">Tıklayın veya birden fazla görseli buraya sürükleyip bırakın</span>
+                <input type="file" id="file-input" hidden accept="image/*" multiple>
+            </div>
+
+            <div class="selection-summary" id="selection-summary">
+                <strong id="file-count">0 görsel seçildi</strong>
+                <span>Görseller seçildikleri sırayla analiz edilir.</span>
+            </div>
+            <div class="preview-grid" id="preview-grid"></div>
+
+            <div class="actions">
+                <button id="analyze-btn" type="button" disabled>Seçilen Görselleri Analiz Et</button>
+                <button id="clear-btn" class="secondary" type="button" disabled>Temizle</button>
+            </div>
+
+            <div class="progress-box" id="progress-box" aria-live="polite">
+                <div class="progress-meta">
+                    <span id="progress-text">Analiz hazırlanıyor…</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+            </div>
+        </div>
+
+        <section class="results" id="results-section">
+            <div class="results-head">
+                <h2>Analiz Sonuçları</h2>
+                <button id="print-btn" class="no-print" type="button">Sonuçları Yazdır</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sıra</th>
+                            <th>Sayaç No</th>
+                            <th>m³ Değeri</th>
+                            <th>Dosya Adı</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-body"></tbody>
+                </table>
+            </div>
+            <p class="save-message no-print" id="save-message" aria-live="polite"></p>
+        </section>
+    </section>
+</main>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('drop-zone');
+    const previewGrid = document.getElementById('preview-grid');
+    const selectionSummary = document.getElementById('selection-summary');
+    const fileCount = document.getElementById('file-count');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const progressBox = document.getElementById('progress-box');
+    const progressText = document.getElementById('progress-text');
+    const progressPercent = document.getElementById('progress-percent');
+    const progressBar = document.getElementById('progress-bar');
+    const resultsSection = document.getElementById('results-section');
+    const resultBody = document.getElementById('result-body');
+    const printBtn = document.getElementById('print-btn');
+    const saveMessage = document.getElementById('save-message');
+
+    let selectedFiles = [];
+    let results = [];
+    let previewUrls = [];
+
+    function selectFiles(fileList) {
+        const imageFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'));
+        previewUrls.forEach(url => URL.revokeObjectURL(url));
+        previewUrls = [];
+        selectedFiles = imageFiles;
+        results = [];
+        resultBody.replaceChildren();
+        resultsSection.style.display = 'none';
+        saveMessage.textContent = '';
+        renderPreviews();
+    }
+
+    function renderPreviews() {
+        previewGrid.replaceChildren();
+
+        selectedFiles.forEach(file => {
+            const url = URL.createObjectURL(file);
+            previewUrls.push(url);
+
+            const card = document.createElement('div');
+            card.className = 'preview-card';
+            const image = document.createElement('img');
+            image.src = url;
+            image.alt = file.name;
+            const name = document.createElement('div');
+            name.className = 'preview-name';
+            name.title = file.name;
+            name.textContent = file.name;
+            card.append(image, name);
+            previewGrid.appendChild(card);
+        });
+
+        const hasFiles = selectedFiles.length > 0;
+        selectionSummary.style.display = hasFiles ? 'flex' : 'none';
+        fileCount.textContent = `${selectedFiles.length} görsel seçildi`;
+        analyzeBtn.disabled = !hasFiles;
+        clearBtn.disabled = !hasFiles;
+    }
+
+    function serialSortValue(serial) {
+        const match = String(serial || '').match(/\d{7,8}/);
+        return match ? Number(match[0]) : Number.POSITIVE_INFINITY;
+    }
+
+    function sortResults() {
+        results.sort((a, b) => {
+            const serialDifference = serialSortValue(a.seri_no) - serialSortValue(b.seri_no);
+            return serialDifference || a.file_name.localeCompare(b.file_name, 'tr');
+        });
+    }
+
+    function renderResults() {
+        sortResults();
+        resultBody.replaceChildren();
+
+        results.forEach((item, index) => {
+            const row = document.createElement('tr');
+            if (item.status !== 'success') row.className = 'error-row';
+
+            const values = [
+                index + 1,
+                item.seri_no,
+                item.m3_degeri,
+                item.file_name,
+                item.status === 'success' ? 'Başarılı' : `Hata: ${item.message || 'Okunamadı'}`
+            ];
+
+            values.forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+            resultBody.appendChild(row);
+        });
+
+        resultsSection.style.display = results.length ? 'block' : 'none';
+    }
+
+    function updateProgress(completed, total, currentName = '') {
+        const percentage = total ? Math.round((completed / total) * 100) : 0;
+        progressBar.style.width = `${percentage}%`;
+        progressPercent.textContent = `${percentage}%`;
+        progressText.textContent = completed === total
+            ? `Analiz tamamlandı: ${total} dosya işlendi.`
+            : `${completed + 1}/${total} analiz ediliyor: ${currentName}`;
+    }
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            fileInput.click();
+        }
+    });
+    fileInput.addEventListener('change', event => selectFiles(event.target.files));
+
+    ['dragenter', 'dragover'].forEach(type => dropZone.addEventListener(type, event => {
+        event.preventDefault();
+        dropZone.classList.add('dragging');
+    }));
+    ['dragleave', 'drop'].forEach(type => dropZone.addEventListener(type, event => {
+        event.preventDefault();
+        dropZone.classList.remove('dragging');
+    }));
+    dropZone.addEventListener('drop', event => selectFiles(event.dataTransfer.files));
+
+    clearBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        selectFiles([]);
+        progressBox.style.display = 'none';
+    });
+
+    analyzeBtn.addEventListener('click', async () => {
+        if (!selectedFiles.length) return;
+
+        results = [];
+        renderResults();
+        saveMessage.textContent = '';
+        progressBox.style.display = 'block';
+        analyzeBtn.disabled = true;
+        clearBtn.disabled = true;
+        fileInput.disabled = true;
+        updateProgress(0, selectedFiles.length, selectedFiles[0].name);
+
+        for (let index = 0; index < selectedFiles.length; index += 1) {
+            const file = selectedFiles[index];
+            updateProgress(index, selectedFiles.length, file.name);
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/analyze', { method: 'POST', body: formData });
+                const data = await response.json();
+                if (!response.ok || data.status !== 'success') {
+                    throw new Error(data.message || `Sunucu hatası (${response.status})`);
+                }
+                results.push({
+                    file_name: file.name,
+                    status: 'success',
+                    m3_degeri: data.m3_degeri,
+                    seri_no: data.seri_no,
+                    message: null
+                });
+            } catch (error) {
+                results.push({
+                    file_name: file.name,
+                    status: 'error',
+                    m3_degeri: '-',
+                    seri_no: 'Okunamadı',
+                    message: error.message
+                });
+            }
+
+            renderResults();
+            updateProgress(index + 1, selectedFiles.length);
+        }
+
+        analyzeBtn.disabled = false;
+        clearBtn.disabled = false;
+        fileInput.disabled = false;
+    });
+
+    printBtn.addEventListener('click', async () => {
+        if (!results.length) return;
+
+        printBtn.disabled = true;
+        saveMessage.textContent = 'Sonuçlar JSON dosyasına kaydediliyor…';
+
+        try {
+            sortResults();
+            const response = await fetch('/api/save-results', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ results })
+            });
+            const data = await response.json();
+            if (!response.ok || data.status !== 'success') {
+                throw new Error(data.message || 'JSON dosyası kaydedilemedi.');
+            }
+
+            saveMessage.textContent = `JSON kaydedildi: ${data.relative_path}`;
+            window.print();
+        } catch (error) {
+            saveMessage.textContent = `Kayıt hatası: ${error.message}`;
+        } finally {
+            printBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

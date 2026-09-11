@@ -1,0 +1,151 @@
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
+from qwen_vl_utils import process_vision_info
+import torch
+from PIL import Image
+import cv2
+import numpy as np
+import io
+import json
+import re
+import traceback
+
+app = FastAPI(title="Water Meter Reader AI")
+
+print("Qwen2-VL modeli yükleniyor, please wait...")
+# Modeli float16 formatında yükleyerek VRAM kullanımını yarıya indiriyoruz
+model = Qwen2VLForConditionalGeneration.from_pretrained(
+    "Qwen/Qwen2-VL-2B-Instruct", 
+    torch_dtype=torch.float16, 
+    device_map="auto"
+)
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+print("Model başarıyla yüklendi!")
+
+def get_unrolled_ring(image_bytes):
+    """
+    OpenCV ile sayacın yuvarlak dış sarı çemberini bulur, 
+    keser ve okunabilir yatay, düz bir şerit haline getirir.
+    """
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    h, w = img.shape[:2]
+    
+    cx, cy = w // 2, h // 2
+    radius = int(min(w, h) * 0.4)
+    
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blur = cv2.medianBlur(gray, 5)
+    circles = cv2.HoughCircles(
+        blur, cv2.HOUGH_GRADIENT, 1, h // 4,
+        param1=50, param2=35, 
+        minRadius=int(min(w, h) * 0.25), 
+        maxRadius=int(min(w, h) * 0.5)
+    )
+    
+    if circles is not None:
+        circles = np.uint16(np.around(circles))
+        cx, cy, radius = circles[0][0]
+        
+    min_r = int(radius * 0.8)
+    max_r = int(radius * 1.25)
+    
+    # Kutupsal dönüşüm: Dairesel metni düz bir cetvele çevir
+    unrolled = cv2.warpPolar(img, (max_r, 1600), (cx, cy), max_r, cv2.WARP_POLAR_LINEAR)
+    ring_strip = unrolled[:, min_r:max_r]
+    # Yazının yatay okunabilmesi için şeridi döndür
+    ring_strip = cv2.rotate(ring_strip, cv2.ROTATE_90_CLOCKWISE)
+    
+    return Image.fromarray(cv2.cvtColor(ring_strip, cv2.COLOR_BGR2RGB))
+
+@app.post("/api/analyze")
+async def analyze_meter(file: UploadFile = File(...)):
+    try:
+        # GPU Memory check
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        contents = await file.read()
+        
+        # 1. Ham Görsel (m3 okuması için)
+        pil_image = Image.open(io.BytesIO(contents)).convert("RGB")
+        pil_image.thumbnail((1024, 1024))
+        
+        # 2. Düzleştirilmiş Şerit Görseli (Seri No okuması için)
+        ring_image = get_unrolled_ring(contents)
+        
+        # Çoklu görsel içeren katı prompt yapısı (Örneği kaldırdık!)
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image", "image": pil_image},
+                    {
+                        "type": "text", 
+                        "text": "Task: Perform OCR. Read the 5-digit number on the mechanical counter. Output strictly valid JSON."
+                    },
+                    {"type": "image", "image": ring_image},
+                    {
+                        "type": "text", 
+                        "text": "This is a flattened strip of the water meter's outer brass ring. Read the 8-digit serial number engraved on it. Output strictly valid JSON."
+                    },
+                    {"type": "text", "text": "Return ONLY as valid JSON format: {\"m3_degeri\": \"...\", \"seri_no\": \"KASKI ...\"}"}
+                ]
+            }
+        ]
+
+        text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        image_inputs, video_inputs = process_vision_info(messages)
+        inputs = processor(
+            text=[text],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+        ).to(model.device)
+
+        # Çıkarım (Inference) işlemi
+        generated_ids = model.generate(**inputs, max_new_tokens=128)
+        generated_ids_trimmed = [
+            out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+        ]
+        output_text = processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )[0]
+
+        print("\n" + "="*30)
+        print("GEOMETRİK DÖNÜŞÜM SONRASI MODEL ÇIKTISI:")
+        print(output_text)
+        print("="*30 + "\n")
+
+        # Modelin ürettiği metin içinden JSON'ı ayıklama
+        json_match = re.search(r'\{.*\}', output_text.replace('\n', ''), re.IGNORECASE)
+        if json_match:
+            result_dict = json.loads(json_match.group())
+            # Ham seri numarasını alıp RegEx ile 7-8 haneli rakamı cımbızlayalım
+            ham_seri = result_dict.get("seri_no", "Okunamadı")
+            seri_match = re.search(r'\d{7,8}', ham_seri)
+            temiz_seri = "KASKI " + seri_match.group() if seri_match else ham_seri
+
+            return JSONResponse(content={
+                "status": "success",
+                "m3_degeri": result_dict.get("m3_degeri", "Okunamadı"),
+                "seri_no": temiz_seri
+            })
+        else:
+            raise ValueError("Model JSON formatında bir çıktı üretmedi.")
+
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(content={"status": "error", "message": str(e)}, status_code=500)
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

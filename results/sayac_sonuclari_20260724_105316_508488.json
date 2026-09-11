@@ -1,0 +1,77 @@
+{
+  "created_at": "2026-07-24T10:53:16+03:00",
+  "total_count": 10,
+  "successful_count": 10,
+  "results": [
+    {
+      "file_name": "IMG-20260504-WA0016.jpg",
+      "status": "success",
+      "m3_degeri": "03210",
+      "seri_no": "KASKI 5837091",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260519-WA0001.jpg",
+      "status": "success",
+      "m3_degeri": "00000002",
+      "seri_no": "KASKI 9621796",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0000.jpg",
+      "status": "success",
+      "m3_degeri": "00174",
+      "seri_no": "KASKI 17668817",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260506-WA0027.jpg",
+      "status": "success",
+      "m3_degeri": "0040",
+      "seri_no": "KASKI 17682678",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0042.jpg",
+      "status": "success",
+      "m3_degeri": "00039",
+      "seri_no": "KASKI 24102086",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260507-WA0009.jpg",
+      "status": "success",
+      "m3_degeri": "0007",
+      "seri_no": "KASKI 24102407",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0025.jpg",
+      "status": "success",
+      "m3_degeri": "0000",
+      "seri_no": "KASKI 24116799",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260514-WA0021.jpg",
+      "status": "success",
+      "m3_degeri": "00000",
+      "seri_no": "KASKI 26031671",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260514-WA0024.jpg",
+      "status": "success",
+      "m3_degeri": "00001",
+      "seri_no": "KASKI 26031671",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260514-WA0023.jpg",
+      "status": "success",
+      "m3_degeri": "00001",
+      "seri_no": "2026",
+      "message": null
+    }
+  ]
+}

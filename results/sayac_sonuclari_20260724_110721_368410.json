@@ -1,0 +1,252 @@
+{
+  "created_at": "2026-07-24T11:07:21+03:00",
+  "total_count": 35,
+  "successful_count": 35,
+  "results": [
+    {
+      "file_name": "IMG-20260520-WA0008.jpg",
+      "status": "success",
+      "m3_degeri": "00942",
+      "seri_no": "KASKI 1670444",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260521-WA0018.jpg",
+      "status": "success",
+      "m3_degeri": "107283",
+      "seri_no": "KASKI 2130990",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260521-WA0019.jpg",
+      "status": "success",
+      "m3_degeri": "2130990",
+      "seri_no": "KASKI 2130990",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260602-WA0021.jpg",
+      "status": "success",
+      "m3_degeri": "00895",
+      "seri_no": "KASKI 3115508",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260504-WA0016.jpg",
+      "status": "success",
+      "m3_degeri": "03210",
+      "seri_no": "KASKI 5837091",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260519-WA0001.jpg",
+      "status": "success",
+      "m3_degeri": "00000002",
+      "seri_no": "KASKI 9621796",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260601-WA0041.jpg",
+      "status": "success",
+      "m3_degeri": "00217",
+      "seri_no": "KASKI 9659672",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0000.jpg",
+      "status": "success",
+      "m3_degeri": "00174",
+      "seri_no": "KASKI 17668817",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260506-WA0027.jpg",
+      "status": "success",
+      "m3_degeri": "0040",
+      "seri_no": "KASKI 17682678",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260522-WA0021.jpg",
+      "status": "success",
+      "m3_degeri": "67",
+      "seri_no": "KASKI 19837080",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260522-WA0020.jpg",
+      "status": "success",
+      "m3_degeri": "00000",
+      "seri_no": "KASKI 19837146",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260525-WA0019.jpg",
+      "status": "success",
+      "m3_degeri": "0.56%",
+      "seri_no": "KASKI 24040422",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260522-WA0013.jpg",
+      "status": "success",
+      "m3_degeri": "00000",
+      "seri_no": "KASKI 24058719",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260525-WA0020.jpg",
+      "status": "success",
+      "m3_degeri": "0",
+      "seri_no": "KASKI 24100491",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0042.jpg",
+      "status": "success",
+      "m3_degeri": "00039",
+      "seri_no": "KASKI 24102086",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260507-WA0009.jpg",
+      "status": "success",
+      "m3_degeri": "0007",
+      "seri_no": "KASKI 24102407",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260521-WA0015.jpg",
+      "status": "success",
+      "m3_degeri": "24102498",
+      "seri_no": "KASKI 24102498",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0025.jpg",
+      "status": "success",
+      "m3_degeri": "0000",
+      "seri_no": "KASKI 24116799",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260522-WA0028.jpg",
+      "status": "success",
+      "m3_degeri": "0.00",
+      "seri_no": "KASKI 24118155",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260514-WA0021.jpg",
+      "status": "success",
+      "m3_degeri": "00000",
+      "seri_no": "KASKI 26031671",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260514-WA0024.jpg",
+      "status": "success",
+      "m3_degeri": "00001",
+      "seri_no": "KASKI 26031671",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260504-WA0015.jpg",
+      "status": "success",
+      "m3_degeri": "0507",
+      "seri_no": "KASKI 432",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260512-WA0034.jpg",
+      "status": "success",
+      "m3_degeri": "107455",
+      "seri_no": "KASKI 1783",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260512-WA0039.jpg",
+      "status": "success",
+      "m3_degeri": "1500",
+      "seri_no": "KASKI 1971",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260514-WA0023.jpg",
+      "status": "success",
+      "m3_degeri": "00001",
+      "seri_no": "2026",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0013.jpg",
+      "status": "success",
+      "m3_degeri": "10478",
+      "seri_no": "TR-06 01.76.332.0183",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0016.jpg",
+      "status": "success",
+      "m3_degeri": "1494",
+      "seri_no": "035406",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260518-WA0026.jpg",
+      "status": "success",
+      "m3_degeri": "00002",
+      "seri_no": "KASKI 2026",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260519-WA0014.jpg",
+      "status": "success",
+      "m3_degeri": "4132",
+      "seri_no": "KASKI 1432",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260520-WA0028.jpg",
+      "status": "success",
+      "m3_degeri": "00000",
+      "seri_no": "KASKI 2275-20495",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260521-WA0014.jpg",
+      "status": "success",
+      "m3_degeri": "06054",
+      "seri_no": "KASKI 1783 T50 TK-21",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260521-WA0017.jpg",
+      "status": "success",
+      "m3_degeri": "11707731",
+      "seri_no": "KASKI 1980",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260521-WA0026.jpg",
+      "status": "success",
+      "m3_degeri": "10190",
+      "seri_no": "KASKI 3",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260522-WA0026.jpg",
+      "status": "success",
+      "m3_degeri": "04585",
+      "seri_no": "M22",
+      "message": null
+    },
+    {
+      "file_name": "IMG-20260601-WA0050.jpg",
+      "status": "success",
+      "m3_degeri": "0804",
+      "seri_no": "KASKI 2009",
+      "message": null
+    }
+  ]
+}
